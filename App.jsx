@@ -1,5 +1,3 @@
-import { useState, useEffect, useRef } from "react";
-
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -996,7 +994,7 @@ function ProgressView({ stats }) {
 
 // ─── MAIN APP ────────────────────────────────────────────────────────────────
 
-export default function App() {
+function App() {
   const [tab, setTab] = useState("home");
   const [activeLesson, setActiveLesson] = useState(null);
   const [stats, setStats] = useState({ streak: 1, wordsLearned: 0, xp: 0, lessonsCompleted: 0 });
