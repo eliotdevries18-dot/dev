@@ -1,17 +1,220 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>HablaSA</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HablaSA | Fluency 2027</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+        .chile-gradient { background: linear-gradient(135deg, #0039a6 0%, #d52b1e 100%); }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" src="App.jsx"></script>
-  <script type="text/babel">
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
-  </script>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const App = () => {
+            const [currentTab, setCurrentTab] = useState('home');
+            const [xp, setXp] = useState(1250);
+            const [streak, setStreak] = useState(14);
+            const [showFlashcardBack, setShowFlashcardBack] = useState(false);
+            const [chatInput, setChatInput] = useState('');
+            const [messages, setMessages] = useState([
+                { sender: 'Valentina', text: "¡Hola! Soy Valentina, tu profe chilena. ¿Quieres aprender por qué decimos 'fome' o prefieres practicar el 'voseo'?" }
+            ]);
+
+            // Full Curriculum Data
+            const modules = [
+                { id: 1, title: "Modismos Chilenos", progress: 85, icon: "🇨🇱", color: "bg-blue-600", detail: "Cachai, bacán, po, fome, pololo." },
+                { id: 2, title: "Argentine Rhythms", progress: 30, icon: "🇦🇷", color: "bg-sky-400", detail: "Che, boludo, voseo, street slang." },
+                { id: 3, title: "Andean Vocabulary", progress: 0, icon: "⛰️", color: "bg-yellow-500", detail: "Peru, Bolivia & Ecuador essentials." },
+                { id: 4, title: "Caribbean Flow", progress: 0, icon: "🌴", color: "bg-orange-500", detail: "Colombia & Venezuela regionalisms." }
+            ];
+
+            const flashcards = [
+                { front: "Al tiro", back: "Immediately / Right now", example: "Trae la cuenta al tiro, por favor." },
+                { front: "Cachai", back: "You know? / Understand?", example: "Es súper difícil, ¿cachai?" },
+                { front: "Fome", back: "Boring", example: "La película estuvo muy fome." }
+            ];
+            const [cardIndex, setCardIndex] = useState(0);
+
+            const handleSendMessage = (e) => {
+                e.preventDefault();
+                if (!chatInput.trim()) return;
+                
+                const newMsgs = [...messages, { sender: 'User', text: chatInput }];
+                setMessages(newMsgs);
+                setChatInput('');
+
+                // Simulated AI Response
+                setTimeout(() => {
+                    setMessages(prev => [...prev, { 
+                        sender: 'Valentina', 
+                        text: `¡Qué buena pregunta! En Chile, lo que acabas de decir se entendería perfecto, pero un local diría: "${chatInput} po".` 
+                    }]);
+                }, 1000);
+            };
+
+            return (
+                <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col shadow-2xl relative">
+                    
+                    {/* TOP NAVIGATION / STATUS */}
+                    <header className="p-6 bg-white border-b sticky top-0 z-20">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-10 h-10 chile-gradient rounded-xl flex items-center justify-center text-white font-black italic">H</div>
+                                <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">HablaSA</h1>
+                            </div>
+                            <div className="flex space-x-4">
+                                <div className="flex items-center space-x-1 font-bold text-orange-500">
+                                    <span>🔥</span><span>{streak}</span>
+                                </div>
+                                <div className="flex items-center space-x-1 font-bold text-blue-600">
+                                    <span>💎</span><span>{xp}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* MAIN CONTENT AREA */}
+                    <main className="flex-1 overflow-y-auto pb-24">
+                        
+                        {currentTab === 'home' && (
+                            <div className="p-6 space-y-8 animate-in fade-in duration-500">
+                                <div className="bg-slate-900 rounded-3xl p-6 text-white card-shadow overflow-hidden relative">
+                                    <div className="relative z-10">
+                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Target: Jan 2027</p>
+                                        <h2 className="text-2xl font-bold mb-4">Road to Fluency</h2>
+                                        <div className="flex items-end space-x-2 mb-2">
+                                            <span className="text-4xl font-black">B1</span>
+                                            <span className="text-slate-400 pb-1">Intermediate</span>
+                                        </div>
+                                        <div className="w-full bg-slate-800 rounded-full h-2 mb-2">
+                                            <div className="bg-blue-500 h-2 rounded-full" style={{width: '45%'}}></div>
+                                        </div>
+                                        <p className="text-xs text-slate-400">242 days of consistency remaining</p>
+                                    </div>
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 text-8xl">🌎</div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-bold text-slate-800">Your Learning Path</h3>
+                                    {modules.map(mod => (
+                                        <div key={mod.id} className="p-4 bg-white border rounded-2xl flex items-center hover:border-blue-500 transition-all cursor-pointer group">
+                                            <div className={`${mod.color} w-12 h-12 rounded-xl flex items-center justify-center text-2xl mr-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                                                {mod.icon}
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-slate-800">{mod.title}</h4>
+                                                <p className="text-xs text-slate-500">{mod.detail}</p>
+                                                <div className="w-full bg-slate-100 h-1.5 mt-2 rounded-full">
+                                                    <div className="bg-blue-600 h-1.5 rounded-full" style={{width: `${mod.progress}%`}}></div>
+                                                </div>
+                                            </div>
+                                            <div className="ml-4 text-slate-300">
+                                                <i className="fas fa-chevron-right"></i>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {currentTab === 'cards' && (
+                            <div className="p-6 h-full flex flex-col space-y-8">
+                                <div className="text-center pt-10">
+                                    <h2 className="text-2xl font-bold text-slate-800">Spaced Repetition</h2>
+                                    <p className="text-slate-500">Reviewing: Chilean Dialect</p>
+                                </div>
+
+                                <div 
+                                    onClick={() => setShowFlashcardBack(!showFlashcardBack)}
+                                    className={`w-full aspect-[4/5] rounded-[2.5rem] p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-500 transform ${showFlashcardBack ? 'bg-blue-600 text-white rotate-y-180' : 'bg-white border-4 border-slate-100 text-slate-800 shadow-xl'}`}
+                                >
+                                    {!showFlashcardBack ? (
+                                        <>
+                                            <span className="text-6xl mb-6">🇨🇱</span>
+                                            <h3 className="text-4xl font-black">{flashcards[cardIndex].front}</h3>
+                                            <p className="mt-4 text-slate-400 text-sm italic">Tap to flip</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <h3 className="text-2xl font-bold mb-4">Meaning:</h3>
+                                            <p className="text-3xl mb-8">{flashcards[cardIndex].back}</p>
+                                            <div className="bg-blue-700/50 p-4 rounded-xl text-sm italic">
+                                                "{flashcards[cardIndex].example}"
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {showFlashcardBack && (
+                                    <div className="flex space-x-3">
+                                        <button onClick={() => {setShowFlashcardBack(false); setCardIndex((cardIndex + 1) % flashcards.length)}} className="flex-1 bg-slate-100 p-4 rounded-2xl font-bold text-slate-600">Hard</button>
+                                        <button onClick={() => {setShowFlashcardBack(false); setCardIndex((cardIndex + 1) % flashcards.length)}} className="flex-1 bg-green-500 p-4 rounded-2xl font-bold text-white shadow-lg shadow-green-200">Easy</button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {currentTab === 'chat' && (
+                            <div className="flex flex-col h-[calc(100vh-180px)]">
+                                <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                                    {messages.map((m, i) => (
+                                        <div key={i} className={`flex ${m.sender === 'User' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm ${m.sender === 'User' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-slate-100 text-slate-800 rounded-bl-none'}`}>
+                                                <p className="text-sm leading-relaxed">{m.text}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <form onSubmit={handleSendMessage} className="p-4 bg-white border-t flex space-x-2">
+                                    <input 
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        placeholder="Pregunta algo en chileno..." 
+                                        className="flex-1 bg-slate-50 border rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                                    />
+                                    <button className="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                                        <i className="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                    </main>
+
+                    {/* DOCK NAVIGATION */}
+                    <nav className="fixed bottom-0 w-full max-w-md bg-white/80 backdrop-blur-lg border-t flex justify-around items-center h-20 safe-area-bottom z-30">
+                        <NavButton icon="fa-home" label="Home" active={currentTab === 'home'} onClick={() => setCurrentTab('home')} />
+                        <NavButton icon="fa-clone" label="Review" active={currentTab === 'cards'} onClick={() => setCurrentTab('cards')} />
+                        <NavButton icon="fa-comment-dots" label="Valentina" active={currentTab === 'chat'} onClick={() => setCurrentTab('chat')} />
+                        <NavButton icon="fa-chart-line" label="Progress" active={currentTab === 'stats'} onClick={() => setCurrentTab('home')} />
+                    </nav>
+                </div>
+            );
+        };
+
+        const NavButton = ({ icon, label, active, onClick }) => (
+            <button onClick={onClick} className={`flex flex-col items-center justify-center space-y-1 w-full h-full transition-colors ${active ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <i className={`fas ${icon} text-xl`}></i>
+                <span className="text-[10px] font-bold uppercase tracking-tighter">{label}</span>
+            </button>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
